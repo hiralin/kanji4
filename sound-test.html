@@ -1,0 +1,35 @@
+<!doctype html>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>KANJI4 音の試聴</title>
+<style>
+  body { font: 16px system-ui, sans-serif; margin: 16px; background: #111; color: #eee; }
+  button { font: inherit; margin: 4px; padding: 8px 14px; border-radius: 6px; border: 1px solid #555; background: #222; color: inherit; }
+  h2 { font-size: 1rem; margin: 20px 0 6px; }
+</style>
+<h1>KANJI4号機 音の試聴</h1>
+<p>node scripts/build-web.ts --serve で開いてください（file:// ではモジュールが読めません）。</p>
+<h2>効果音</h2>
+<div id="se"></div>
+<h2>BGM</h2>
+<div id="bgm"></div>
+<script type="module">
+  import { sound } from './sound.js';
+  const se = [['lever', 'レバー'], ['stop', '停止'], ['bet', 'メダル投入'], ['replay', 'リプレイ'], ['notice', '先告知'], ['kitchou', '後告知（吉兆）'],
+    ['big', 'BIG 揃い'], ['reg', 'REG 揃い'], ['jacin', 'JACIN'], ['jac', 'JAC 入賞'], ['end', 'REG 終了'], ['move', '台の移動'], ['nextDay', '閉店・次の日']];
+  const add = (parent, label, fn) => {
+    const b = document.createElement('button');
+    b.textContent = label;
+    b.onclick = fn;
+    document.getElementById(parent).append(b);
+  };
+  for (const [k, label] of se) add('se', label, () => sound[k]());
+  add('se', 'BIG 終了（ファンファーレ）', () => sound.end('big'));
+  add('se', '払い出し 15枚', () => sound.payout(15));
+  add('se', '回転音 ON/OFF', () => (window.humming = !window.humming) ? sound.humOn() : sound.humOff());
+  add('bgm', '七 BIG BGM', () => sound.bgm('big7'));
+  add('bgm', '漢 BIG BGM', () => sound.bgm('bigKan'));
+  add('bgm', 'REG BGM', () => sound.bgm('reg'));
+  add('bgm', 'ホール BGM', () => sound.bgm('hall'));
+  add('bgm', '止める', () => sound.bgmStop());
+</script>

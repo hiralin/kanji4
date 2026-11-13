@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<link rel="icon" href="data:,">
+<title>Aタイプ台の指示書</title>
+<style>
+  /* Text-first form: the person types the machine; the page puts the 指示書 (Markdown) in a mail body and opens the mailer. */
+  :root {
+    --bg: #fbfaf7; --fg: #1d1b18; --muted: #6b665e; --line: #d9d4ca; --field: #ffffff;
+    --accent: #b8321f; --ok: #2f6f3e; --warn: #9a5b00;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #151311; --fg: #ece7de; --muted: #a39c90; --line: #3a352f; --field: #1f1c19;
+      --accent: #ef6a52; --ok: #79c08a; --warn: #e2a64a;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #151311; --fg: #ece7de; --muted: #a39c90; --line: #3a352f; --field: #1f1c19;
+    --accent: #ef6a52; --ok: #79c08a; --warn: #e2a64a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg);
+    font: 15px/1.7 "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
+  }
+  main { max-width: 760px; margin: 0 auto; padding: 24px 16px 220px; } /* room for the fixed footer, three rows on phones */
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  h2 { font-size: 16px; margin: 32px 0 8px; padding-bottom: 4px; border-bottom: 1px solid var(--line); }
+  p.lead, .hint { color: var(--muted); }
+  .hint { font-size: 13px; margin: 2px 0 6px; white-space: pre-line; }
+  .q { margin: 18px 0; }
+  label.t { display: block; font-weight: 700; }
+  .req { color: var(--accent); font-size: 12px; font-weight: 700; margin-left: 6px; }
+  .opt { color: var(--muted); font-size: 12px; margin-left: 6px; }
+  input[type=text], textarea {
+    width: 100%; padding: 8px 10px; border: 1px solid var(--line); border-radius: 6px;
+    background: var(--field); color: var(--fg); font: 14px/1.6 ui-monospace, "SF Mono", Menlo, "Hiragino Kaku Gothic ProN", monospace;
+  }
+  textarea { min-height: 84px; resize: vertical; }
+  input:focus-visible, textarea:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .choices { display: flex; flex-wrap: wrap; gap: 6px 16px; }
+  .choices label { display: inline-flex; gap: 6px; align-items: center; min-height: 32px; }
+  .missing label.t { color: var(--accent); }
+  footer {
+    position: fixed; left: 0; right: 0; bottom: 0; background: var(--bg); border-top: 1px solid var(--line);
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+  }
+  footer .in { max-width: 760px; margin: 0 auto; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+  #status { flex: 1 1 200px; font-size: 13px; color: var(--muted); }
+  #status.done { color: var(--ok); }
+  button {
+    min-height: 40px; padding: 0 14px; border-radius: 6px; border: 1px solid var(--line);
+    background: var(--field); color: var(--fg); font: inherit; cursor: pointer;
+  }
+  button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  #after { display: none; margin-top: 28px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 6px; }
+  #after.show { display: block; }
+  #after code { user-select: all; }
+  @media (max-width: 520px) { .row { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<main>
+  <h1>Aタイプ台の指示書</h1>
+  <p class="lead">新しいAタイプの台を作るために、人が決める必要のあることをまとめたフォームです。必須の項目をすべて埋めると、指示書を本文に入れた状態でメーラーを開けます。迷う項目は「おまかせ」と書けば、作る側が規則の範囲で決めます。入力は、このブラウザに下書きとして残ります。</p>
+
+  <form id="f" autocomplete="off">
+    <h2>1. 台の骨格</h2>
+    <div class="q" data-req="name">
+      <label class="t" for="name">台の名前<span class="req">必須</span></label>
+      <input type="text" id="name" placeholder="例: 風神雷神">
+    </div>
+    <div class="q" data-req="gen">
+      <span class="t" style="font-weight:700">世代（規則）<span class="req">必須</span></span>
+      <p class="hint">BIG の終わり方、取りこぼしの可否、出玉率の上限が世代で変わります。</p>
+      <div class="choices">
+        <label><input type="radio" name="gen" value="4号機"> 4号機（BIG＝小役ゲーム＋JACIN、取りこぼし・JACIN外しあり）</label>
+        <label><input type="radio" name="gen" value="5.5号機"> 5.5号機（BIG は払い出しの合計で終了、上限480枚）</label>
+        <label><input type="radio" name="gen" value="6号機"> 6号機（BIG は払い出しの合計で終了、上限300枚）</label>
+      </div>
+    </div>
+    <div class="q" data-req="concept">
+      <label class="t" for="concept">テーマと遊び心地<span class="req">必須</span></label>
+      <p class="hint">どんな台か。題材、雰囲気、荒さ（ボーナスが重くて大きいか、軽くて小さいか）、打っていて楽しいところ。</p>
+      <textarea id="concept" placeholder="例: 天気がテーマ。ボーナスは軽め。リーチ目を探すのが楽しい台。"></textarea>
+    </div>
+
+    <h2>2. 図柄とリール</h2>
+    <div class="q" data-req="symbols">
+      <label class="t" for="symbols">図柄の一覧<span class="req">必須</span></label>
+      <p class="hint">1行に1つ、「表示する文字や絵 = 役割」。5.5号機・6号機は10種類まで。</p>
+      <textarea id="symbols" placeholder="例:&#10;雷 = BIG&#10;風 = REG&#10;雨 = リプレイ&#10;晴 = ベル&#10;虹 = スイカ&#10;桜 = チェリー&#10;ん = 空白"></textarea>
+    </div>
+    <div class="q">
+      <label class="t" for="reels">リール配列<span class="opt">任意</span></label>
+      <p class="hint">左・中・右それぞれ21コマを、上から順に。空欄なら、取りこぼしや蹴飛ばしの規則を満たす配列を作る側で探します。並べたい並び（例: 左に「雨晴雷桜」の並び）だけ書くのでもよいです。</p>
+      <textarea id="reels" placeholder="例:&#10;左: 雷雨晴桜風雨晴ん虹雨晴雷雨晴桜ん雨晴虹雨晴&#10;中: おまかせ&#10;右: おまかせ"></textarea>
+    </div>
+
+    <h2>3. 役と払い出し</h2>
+    <div class="q" data-req="bonus">
+      <label class="t" for="bonus">ボーナスの種類と揃える図柄<span class="req">必須</span></label>
+      <p class="hint">BIG・REG を何種類持つか、それぞれの図柄の組合せ（左・中・右）。</p>
+      <textarea id="bonus" placeholder="例:&#10;BIG: 雷雷雷&#10;REG: 雷雷風"></textarea>
+    </div>
+    <div class="q" data-req="bonusSize">
+      <label class="t" for="bonusSize">ボーナスの長さ・獲得枚数<span class="req">必須</span></label>
+      <p class="hint" id="bonusHint">世代を選ぶと、決め方の目安が出ます。「既定」でもかまいません。</p>
+      <textarea id="bonusSize" placeholder="例: BIG は約250枚、REG は約100枚"></textarea>
+    </div>
+    <div class="q" data-req="smalls">
+      <label class="t" for="smalls">小役とリプレイ<span class="req">必須</span></label>
+      <p class="hint">役の名前、揃える図柄、払い出し枚数（1回15枚まで）。チェリーのように左だけでよい役は「左だけ」と書きます。ボーナス中だけの役（JAC など）もここへ。</p>
+      <textarea id="smalls" placeholder="例:&#10;リプレイ: 雨雨雨 / 0枚（もう1回）&#10;ベル: 晴晴晴 / 8枚&#10;スイカ: 虹虹虹 / 15枚&#10;チェリー: 左に桜 / 2枚"></textarea>
+    </div>
+    <div class="q" data-req="odds">
+      <label class="t" for="odds">確率と設定差<span class="req">必須</span></label>
+      <p class="hint">設定1と設定6のボーナス確率の目安、設定差をどこに付けるか（BIG、REG、小役）、小役の確率。分からないところは「おまかせ」。リプレイは規則で約1/7.3以上です。</p>
+      <textarea id="odds" placeholder="例:&#10;ボーナス合算 設定1 1/170、設定6 1/130&#10;設定差は REG に多く付ける&#10;ベル 1/7、チェリー 1/36、スイカ おまかせ"></textarea>
+    </div>
+    <div class="q" data-req="rate1 rate6">
+      <span class="t" style="font-weight:700">機械割の目標<span class="req">必須</span></span>
+      <p class="hint" id="rateHint">世代を選ぶと、規則の上限が出ます。</p>
+      <div class="row">
+        <div><label for="rate1">設定1</label><input type="text" id="rate1" placeholder="例: 97%"></div>
+        <div><label for="rate6">設定6</label><input type="text" id="rate6" placeholder="例: 108%"></div>
+      </div>
+      <p class="hint">フリー打ち（適当に押す）と目押し（狙って押す）のどちらの値かも、分かれば下の「打ち方」に書いてください。</p>
+    </div>
+
+    <h2>4. 停止の制御</h2>
+    <div class="q" data-req="lines">
+      <span class="t" style="font-weight:700">有効ライン（3枚掛け）<span class="req">必須</span></span>
+      <div class="choices">
+        <label><input type="radio" name="lines" value="1ライン（中段）"> 1ライン（中段）</label>
+        <label><input type="radio" name="lines" value="3ライン（上中下）"> 3ライン</label>
+        <label><input type="radio" name="lines" value="5ライン（上中下＋斜め）"> 5ライン</label>
+        <label><input type="radio" name="lines" value="おまかせ"> おまかせ</label>
+      </div>
+    </div>
+    <div class="q" data-req="priority">
+      <span class="t" style="font-weight:700">ボーナスと小役が重なったときの引き込み<span class="req">必須</span></span>
+      <p class="hint">リプレイはどの世代でも先に揃えます。</p>
+      <div class="choices">
+        <label><input type="radio" name="priority" value="小役優先"> 小役優先（小役を先に揃える）</label>
+        <label><input type="radio" name="priority" value="ボーナス優先"> ボーナス優先</label>
+        <label><input type="radio" name="priority" value="おまかせ"> おまかせ</label>
+      </div>
+    </div>
+    <div class="q">
+      <label class="t" for="aim">打ち方（押し順・目押し）<span class="opt">任意</span></label>
+      <p class="hint">適当に押しても取れる役、目押しが要る役、押し順で結果が変わってほしいところ。</p>
+      <textarea id="aim" placeholder="例: ベルとリプレイはどこで押しても揃う。スイカだけ目押しが要る。"></textarea>
+    </div>
+    <div class="q">
+      <label class="t" for="control">リーチ目・特別な制御<span class="opt">任意</span></label>
+      <p class="hint">ボーナスが確定する停止形、すべり方の癖、4号機だけにある取りこぼしや JACIN外しなど。</p>
+      <textarea id="control" placeholder="例: 左上に雷、右下に雷が止まったらボーナス確定"></textarea>
+    </div>
+
+    <h2>5. 告知と演出</h2>
+    <div class="q" data-req="notice">
+      <span class="t" style="font-weight:700">ボーナスの知らせ方<span class="req">必須</span></span>
+      <div class="choices">
+        <label><input type="radio" name="notice" value="告知ランプ（光る）"> 告知ランプ（光る）</label>
+        <label><input type="radio" name="notice" value="告知ランプとリーチ目の両方"> 告知ランプとリーチ目の両方</label>
+        <label><input type="radio" name="notice" value="告知なし（リーチ目だけ）"> 告知なし（リーチ目だけ）</label>
+        <label><input type="radio" name="notice" value="おまかせ"> おまかせ</label>
+      </div>
+      <p class="hint">光るタイミング（レバーで先に光る、止め終わってから光る、次ゲーム）や割合の希望があれば下へ。</p>
+    </div>
+    <div class="q">
+      <label class="t" for="effects">予告音・フラッシュ・演出<span class="opt">任意</span></label>
+      <textarea id="effects" placeholder="例: レバーで雷の音が鳴ったらチャンス。BIG 中は雨音。"></textarea>
+    </div>
+    <div class="q">
+      <label class="t" for="look">見た目（色・書体・筐体）<span class="opt">任意</span></label>
+      <textarea id="look" placeholder="例: 紺と金。図柄は筆文字。"></textarea>
+    </div>
+    <div class="q">
+      <label class="t" for="sound">音<span class="opt">任意</span></label>
+      <textarea id="sound" placeholder="例: BIG のファンファーレは和太鼓。"></textarea>
+    </div>
+
+    <h2>6. その他</h2>
+    <div class="q">
+      <label class="t" for="hall">ホールに置くか<span class="opt">任意</span></label>
+      <textarea id="hall" placeholder="例: 漢字会館の隣の島に4台"></textarea>
+    </div>
+    <div class="q">
+      <label class="t" for="notes">ほかに伝えたいこと<span class="opt">任意</span></label>
+      <textarea id="notes"></textarea>
+    </div>
+    <div class="q">
+      <label class="t" for="author">あなたの名前<span class="opt">任意</span></label>
+      <input type="text" id="author">
+    </div>
+  </form>
+
+  <div id="after" role="status">
+    <p><strong>メーラーを開きました。</strong>本文の指示書をそのまま送ってください。メーラーが開かないときや本文が途中で切れたときは、本文をコピーして、下の宛先へ送ってください。</p>
+    <p>宛先: <code id="to"></code> <button type="button" id="copyTo">宛先をコピー</button></p>
+    <p><button type="button" id="copyBody">本文をコピー</button></p>
+  </div>
+</main>
+
+<footer>
+  <div class="in">
+    <span id="status" aria-live="polite"></span>
+    <button type="button" id="clear">下書きを消す</button>
+    <button type="button" class="primary" id="send" disabled>メーラーを開く</button>
+  </div>
+</footer>
+
+<script>
+const TO = 'hirarin.love.beer@gmail.com';
+const KEY = 'atype-order-draft';
+const form = document.getElementById('f');
+const $ = (id) => document.getElementById(id);
+$('to').textContent = TO;
+
+const GEN = {
+  '4号機': {
+    bonus: '既定: BIG は小役ゲーム30G か JACIN 3回の早い方で終了、JAC ゲーム（REG も同じ）は12G か8回入賞で終了。BIG 1回の最大は約711枚。回数を変えたいときはここに。',
+    rate: '規則: 17,500G で120%未満（下限は55%とされる）。',
+  },
+  '5.5号機': {
+    bonus: '決め方: BIG は払い出しの合計が決めた枚数（465枚以下）を超えたら終了。REG は12G か8回入賞まで。例: BIG 約312枚、REG 約104枚。',
+    rate: '規則: 400G で300%未満、6,000G で150%未満、17,500G で55%超120%未満。',
+  },
+  '6号機': {
+    bonus: '決め方: BIG は払い出しの合計が決めた枚数（285枚以下）を超えたら終了（最大300枚）。REG は12G か8回入賞まで。例: BIG 約250枚、REG 約100枚。',
+    rate: '規則: 17,500G で60%超115%未満（ほかに 400G・1,600G・6,000G の上限下限）。目安は設定1が97%前後、設定6が105〜110%。',
+  },
+};
+
+// [heading, id or radio name, required]
+const FIELDS = [
+  ['台の名前', 'name', true], ['世代', 'gen', true], ['テーマと遊び心地', 'concept', true],
+  ['図柄の一覧', 'symbols', true], ['リール配列', 'reels', false],
+  ['ボーナスの種類と揃える図柄', 'bonus', true], ['ボーナスの長さ・獲得枚数', 'bonusSize', true],
+  ['小役とリプレイ', 'smalls', true], ['確率と設定差', 'odds', true],
+  ['機械割の目標（設定1）', 'rate1', true], ['機械割の目標（設定6）', 'rate6', true],
+  ['有効ライン', 'lines', true], ['引き込みの優先', 'priority', true],
+  ['打ち方（押し順・目押し）', 'aim', false], ['リーチ目・特別な制御', 'control', false],
+  ['ボーナスの知らせ方', 'notice', true], ['予告音・フラッシュ・演出', 'effects', false],
+  ['見た目', 'look', false], ['音', 'sound', false], ['ホールに置くか', 'hall', false],
+  ['ほかに伝えたいこと', 'notes', false], ['名前', 'author', false],
+];
+
+const value = (key) => {
+  const el = $(key);
+  if (el) return el.value.trim();
+  return form.querySelector(`input[name="${key}"]:checked`)?.value ?? '';
+};
+
+function readAll() {
+  return Object.fromEntries(FIELDS.map(([, k]) => [k, value(k)]));
+}
+
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(readAll())); } catch {}
+}
+
+function load() {
+  let data = null;
+  try { data = JSON.parse(localStorage.getItem(KEY) || 'null'); } catch {}
+  if (!data) return;
+  for (const [, k] of FIELDS) {
+    const v = data[k];
+    if (!v) continue;
+    const el = $(k);
+    if (el) el.value = v;
+    else { const r = form.querySelector(`input[name="${k}"][value="${CSS.escape(v)}"]`); if (r) r.checked = true; }
+  }
+}
+
+function missing() {
+  return FIELDS.filter(([, k, req]) => req && !value(k));
+}
+
+function update(markMissing = false) {
+  const gen = GEN[value('gen')];
+  $('bonusHint').textContent = gen ? gen.bonus : '世代を選ぶと、決め方の目安が出ます。「既定」でもかまいません。';
+  $('rateHint').textContent = gen ? gen.rate : '世代を選ぶと、規則の上限が出ます。';
+  const miss = missing();
+  const missKeys = new Set(miss.map(([, k]) => k));
+  for (const q of form.querySelectorAll('[data-req]')) {
+    const keys = q.dataset.req.split(' ');
+    q.classList.toggle('missing', markMissing && keys.some((k) => missKeys.has(k)));
+  }
+  $('send').disabled = miss.length > 0;
+  const st = $('status');
+  st.classList.toggle('done', miss.length === 0);
+  st.textContent = miss.length === 0 ? '必須の項目はすべて埋まりました。' : `必須の残り ${miss.length} 項目: ${miss.map(([h]) => h).join('、')}`;
+}
+
+function markdown() {
+  const d = readAll();
+  const today = new Date().toLocaleDateString('ja-JP', { year: 'numeric', month: '2-digit', day: '2-digit' });
+  const lines = [`# 指示書: ${d.name}`, '', `- 世代: ${d.gen}`, `- 作成日: ${today}`];
+  if (d.author) lines.push(`- 指示した人: ${d.author}`);
+  for (const [h, k] of FIELDS) {
+    if (['name', 'gen', 'author'].includes(k)) continue;
+    lines.push('', `## ${h}`, '', d[k] || '（指定なし。作る側で決める）');
+  }
+  lines.push('', '---', '', 'このフォームの「おまかせ」と「指定なし」は、作る側が世代の規則の範囲で決めてよい項目です。', '');
+  return lines.join('\n');
+}
+
+function subject() {
+  return `Aタイプ台の指示書: ${value('name')}`;
+}
+
+$('send').addEventListener('click', () => {
+  if (missing().length) { update(true); return; }
+  location.href = `mailto:${TO}?subject=${encodeURIComponent(subject())}&body=${encodeURIComponent(markdown())}`;
+  $('after').classList.add('show');
+});
+
+const copy = (id, text) => async () => {
+  try { await navigator.clipboard.writeText(text()); $(id).textContent = 'コピーしました'; } catch { $(id).textContent = 'コピーできませんでした'; }
+};
+$('copyTo').addEventListener('click', copy('copyTo', () => TO));
+$('copyBody').addEventListener('click', copy('copyBody', markdown));
+$('clear').addEventListener('click', () => {
+  form.reset();
+  try { localStorage.removeItem(KEY); } catch {}
+  $('after').classList.remove('show');
+  update();
+});
+form.addEventListener('input', () => { save(); update(); });
+form.addEventListener('change', () => { save(); update(); });
+
+load();
+update();
+</script>
+</body>
+</html>

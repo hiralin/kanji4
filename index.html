@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link rel="icon" href="data:,">
+<!-- ARTIFACT-START -->
+<title>漢字会館</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=DotGothic16&family=Hachi+Maru+Pop&family=Kaisei+Decol:wght@700&family=Yuji+Syuku&family=Zen+Antique&family=Zen+Kaku+Gothic+New:wght@400;700&display=swap">
+<style>
+  /* Two screens: the hall (islands of machine cards, past days) and one machine. Single dark look on purpose (a lit hall). */
+  :root {
+    --lacquer: #150d0b;
+    --lacquer-2: #2a1813;
+    --lacquer-3: #3a241c;
+    --line: #3a221a;
+    --line-2: #5a3a2c;
+    --ink: #090403;
+    --shu: #d3442b;
+    --gold: #d9b45f;
+    --washi: #f1e6cd;
+    --led: #ff5a3c;
+    --reg: #8fb8ff;
+    --muted: #a8958a;
+    --font-display: "Dela Gothic One", "Hiragino Sans", "Yu Gothic", sans-serif;
+    --font-led: "DotGothic16", ui-monospace, "SF Mono", monospace;
+    --font-body: "Zen Kaku Gothic New", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Noto Sans JP", system-ui, sans-serif;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  html, body { background: var(--lacquer); color: var(--washi); }
+  body {
+    margin: 0; font-family: var(--font-body); min-height: 100%;
+    background: radial-gradient(120% 80% at 50% 0%, var(--lacquer-2), var(--lacquer) 70%);
+    padding-block: 24px 40px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  .app { max-width: 1100px; margin: 0 auto; }
+  h1, h2, h3, p { margin: 0; }
+  button { font: inherit; color: inherit; }
+  [hidden] { display: none !important; }
+  .btn {
+    border: 1px solid var(--line-2); background: var(--lacquer-2); border-radius: 12px; padding: 12px 18px; min-height: 44px;
+    font-weight: 700; font-size: 15px; cursor: pointer; display: inline-flex; gap: 8px; align-items: center; justify-content: center;
+    touch-action: manipulation; color: var(--washi);
+  }
+  .btn:hover { border-color: var(--gold); }
+  .btn:focus-visible, .tab:focus-visible, .link:focus-visible, .sit:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  [tabindex="-1"]:focus { outline: none; } /* headings focused on screen change */
+  .btn.gold { border-color: var(--gold); }
+  .btn.quiet { border-color: var(--muted); }
+  kbd { font-family: var(--font-led); font-size: 12px; border: 1px solid var(--muted); border-radius: 4px; padding: 1px 6px; color: var(--muted); font-weight: 400; }
+  .ledbox { background: var(--ink); border-radius: 10px; padding: 8px 16px; display: grid; gap: 2px; }
+  .ledbox small, .led small { color: var(--muted); font-size: 11px; }
+  .ledbox output, .led output {
+    font-family: var(--font-led); font-size: 28px; line-height: 1.15; color: var(--led);
+    text-shadow: 0 0 10px rgba(255, 90, 60, 0.6); font-variant-numeric: tabular-nums;
+  }
+  .message { min-height: 1.5em; font-weight: 700; }
+  .section-head { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; }
+  .section-head h2 { font-size: 20px; }
+  .section-head p { color: var(--muted); font-size: 13px; }
+
+  /* Hall */
+  .hall { display: grid; gap: 28px; }
+  .topbar { display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: center; }
+  .store-name { display: grid; gap: 4px; flex: 1 1 260px; }
+  .store-name h1 { font-family: var(--font-display); font-weight: 400; font-size: 36px; color: var(--gold); line-height: 1.1; }
+  .store-name p { color: var(--muted); font-size: 14px; }
+  #hall-message { flex-basis: 100%; min-height: 0; }
+  .island { display: grid; gap: 14px; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 16px; }
+  .card { background: var(--lacquer-2); border: 1px solid var(--line); border-radius: 12px; overflow: hidden; display: flex; flex-direction: column; }
+  .lamp { background: var(--ink); padding: 12px; display: grid; gap: 6px; position: relative; }
+  .lamp h3 { font-family: var(--font-led); font-weight: 400; font-size: 28px; color: var(--led); line-height: 1.1; }
+  .lamp .row { display: flex; flex-wrap: wrap; gap: 4px 10px; }
+  .stat { display: inline-flex; gap: 6px; align-items: baseline; }
+  .stat small { color: var(--muted); font-size: 11px; }
+  .stat b { font-family: var(--font-led); font-weight: 400; font-size: 16px; color: var(--led); }
+  .link {
+    position: absolute; top: 10px; right: 10px; background: none; border: 1px solid var(--line-2); border-radius: 999px;
+    color: var(--muted); font-size: 12px; padding: 4px 10px; min-height: 28px; cursor: pointer;
+  }
+  .link:hover { color: var(--washi); border-color: var(--gold); }
+  .model { padding: 14px 12px; display: grid; gap: 8px; justify-items: center; }
+  .faces { display: flex; gap: 2px; }
+  .faces img { width: 33%; max-width: 50px; aspect-ratio: 5 / 3; display: block; }
+  .model p { font-family: var(--font-display); font-size: 16px; }
+  .sit {
+    width: 100%; border: 0; border-radius: 999px; background: var(--shu); color: var(--washi); font-weight: 700; font-size: 14px;
+    padding: 8px 16px; min-height: 40px; cursor: pointer; touch-action: manipulation;
+  }
+  .sit.mine { background: var(--gold); color: var(--lacquer); }
+  .coming {
+    border: 1.5px dashed var(--muted); border-radius: 12px; color: var(--muted); min-height: 160px; max-width: 384px;
+    display: grid; place-content: center; text-align: center; gap: 8px; padding: 28px 24px;
+  }
+  .coming strong { font-family: var(--font-display); font-weight: 400; font-size: 20px; }
+  .coming span { font-size: 13px; }
+  .tabs { display: flex; flex-wrap: wrap; gap: 8px; }
+  .tab {
+    border: 1px solid var(--gold); border-radius: 999px; background: none; color: var(--gold); font-weight: 700; font-size: 13px;
+    padding: 6px 14px; min-height: 36px; cursor: pointer;
+  }
+  .tab[aria-pressed="true"] { background: var(--gold); color: var(--lacquer); }
+  .table-wrap { overflow-x: auto; max-width: 100%; }
+  table { border-collapse: collapse; background: var(--lacquer-2); border-radius: 10px; overflow: hidden; white-space: nowrap; }
+  th { background: var(--shu); font-size: 13px; text-align: left; }
+  th, td { padding: 8px 14px; }
+  td { font-family: var(--font-led); font-size: 17px; color: var(--led); font-variant-numeric: tabular-nums; }
+  tbody tr:nth-child(even) { background: rgba(0, 0, 0, 0.18); }
+  td.hi { color: var(--gold); }
+  .empty { color: var(--muted); font-size: 14px; }
+
+  /* Machine */
+  .machine { display: grid; grid-template-columns: minmax(0, 556px) minmax(0, 1fr); gap: 32px; align-items: start; }
+  .cabinet, .panel { display: grid; gap: 14px; min-width: 0; }
+  .marquee { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; }
+  .title {
+    font-family: var(--font-display); font-weight: 400; font-size: clamp(28px, 7vw, 36px); line-height: 1.1;
+    color: var(--shu); text-shadow: 2px 2px 0 var(--gold);
+  }
+  .marquee output { font-family: var(--font-led); font-size: 20px; color: var(--led); }
+  .window {
+    background: #0b0605; border: 3px solid var(--gold); border-radius: 18px; overflow: hidden; display: grid;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), inset 0 0 40px rgba(0, 0, 0, 0.8);
+  }
+  .stage { position: relative; aspect-ratio: 4 / 3; }
+  .stage canvas { display: block; width: 100%; height: 100%; }
+  .overlay {
+    position: absolute; inset: auto 0 10px; text-align: center; font-family: var(--font-led); font-size: 18px;
+    color: var(--led); text-shadow: 0 0 8px var(--led); letter-spacing: 0.2em; pointer-events: none;
+  }
+  .loading { inset: 0; display: grid; place-items: center; color: var(--muted); text-shadow: none; letter-spacing: 0; font-family: var(--font-body); padding: 16px; }
+  /* Fixed height (3 lines) so the deck below never moves while the text changes. */
+  .window .message { text-align: center; padding: 0 16px; margin-bottom: 12px; font-size: 14px; line-height: 1.6; height: 4.8em; overflow: hidden; }
+  .window .message[hidden] { display: none; }
+  .toast {
+    position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); max-width: calc(100% - 32px);
+    background: rgba(11, 6, 5, 0.88); border: 1px solid var(--gold); border-radius: 10px; padding: 10px 14px;
+    font-size: 14px; text-align: center; pointer-events: none;
+  }
+  /* Fixed columns so changing digits never move the other counters. */
+  .leds { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px 16px; background: var(--ink); border-radius: 12px; padding: 10px 16px; }
+  .led { display: grid; gap: 2px; min-width: 0; }
+  .status { display: flex; flex-wrap: wrap; gap: 6px 10px; align-items: center; color: var(--muted); font-size: 13px; }
+  .chip { border: 1px solid var(--gold); color: var(--gold); border-radius: 999px; padding: 3px 12px; font-size: 13px; font-weight: 700; }
+  .chip[data-state="bigSmall"], .chip[data-state="jac"] { background: var(--shu); border-color: var(--shu); color: var(--washi); }
+  .box { background: var(--lacquer-2); border-radius: 14px; padding: 16px; display: grid; gap: 12px; }
+  .box h2 { color: var(--gold); font-size: 16px; }
+  /* Control deck under the reels: lever on the left, one stop button under each reel (reel centres sit at about 23%, 50% and 77% of the window). */
+  .deck {
+    position: relative; display: grid; grid-template-columns: minmax(0, 1fr) repeat(3, 27%) minmax(0, 1fr); align-items: end;
+    padding: 14px 0 18px; background: linear-gradient(#24140f, #120907); border-top: 2px solid #3a221a;
+  }
+  .deck kbd { font-size: 10px; padding: 0 4px; }
+  .lever {
+    position: absolute; left: 4px; bottom: 14px; display: grid; justify-items: center; gap: 0; background: none; border: 0; padding: 0;
+    cursor: pointer; touch-action: manipulation; color: var(--muted);
+  }
+  .lever .knob {
+    width: 38px; height: 38px; border-radius: 50%; position: relative; z-index: 1;
+    background: radial-gradient(circle at 35% 30%, #ff9c80, var(--shu) 55%, #6e1609); box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6);
+  }
+  .lever .stick { width: 8px; height: 34px; margin-top: -4px; border-radius: 4px; background: linear-gradient(90deg, #8a8a8a, #e8e8e8 45%, #6a6a6a); transform-origin: bottom; }
+  .lever kbd { margin-top: 6px; }
+  .lever.pulled .knob, .lever:active .knob { transform: translateY(14px); }
+  .lever.pulled .stick, .lever:active .stick { transform: scaleY(0.6); }
+  @media (prefers-reduced-motion: reduce) { .lever .knob, .lever .stick { transition: none; } }
+  .lever .knob, .lever .stick { transition: transform 0.12s; }
+  .stop {
+    grid-row: 1; justify-self: center; width: min(64px, 80%); aspect-ratio: 1; border-radius: 50%; display: grid; place-items: end center; padding-bottom: 6px;
+    border: 3px solid #5a3a2c; background: radial-gradient(circle at 40% 35%, #4a3028, #22140f 70%); color: var(--muted);
+    cursor: pointer; touch-action: manipulation; box-shadow: 0 4px 0 #0b0605, 0 6px 12px rgba(0, 0, 0, 0.5);
+  }
+  #stop0 { grid-column: 2; } #stop1 { grid-column: 3; } #stop2 { grid-column: 4; }
+  .stop[data-lit="true"] {
+    border-color: #ff9c80; color: var(--washi);
+    background: radial-gradient(circle at 40% 35%, #ff8a6a, var(--shu) 60%, #7c1a0e); box-shadow: 0 4px 0 #0b0605, 0 0 16px rgba(255, 90, 60, 0.6);
+  }
+  .stop:active { transform: translateY(3px); box-shadow: 0 1px 0 #0b0605; }
+  .lever:focus-visible, .stop:focus-visible { outline: 2px solid var(--gold); outline-offset: 3px; }
+  .note { color: var(--muted); font-size: 12px; line-height: 1.7; }
+  .history { list-style: none; padding: 0; margin: 0; display: grid; gap: 8px; max-height: 240px; overflow-y: auto; }
+  .history li { display: flex; gap: 16px; align-items: baseline; }
+  .history b { font-size: 14px; color: var(--shu); min-width: 3.5em; }
+  .history b.reg { color: var(--reg); }
+  .history span { font-family: var(--font-led); font-size: 15px; color: var(--led); min-width: 4em; }
+  .history span + span { color: var(--washi); }
+  .others { display: flex; flex-wrap: wrap; gap: 10px; }
+  .debug { font-family: var(--font-led); color: var(--gold); font-size: 14px; }
+
+  dialog {
+    background: var(--lacquer-2); color: var(--washi); border: 1px solid var(--gold); border-radius: 14px; padding: 20px;
+    width: min(420px, calc(100vw - 32px));
+  }
+  dialog::backdrop { background: rgba(0, 0, 0, 0.6); }
+  dialog h2 { color: var(--gold); font-size: 16px; margin-bottom: 12px; }
+  dialog form { margin-top: 16px; text-align: right; }
+  #strip-dialog { max-height: calc(100vh - 32px); overflow: auto; }
+  .strips { width: 100%; border-collapse: collapse; text-align: center; }
+  .strips th { color: var(--gold); font-size: 13px; padding: 4px; }
+  .strips td { padding: 2px 4px; }
+  .strips td:first-child { font-family: var(--font-led); color: var(--led); }
+  .strips img { display: block; width: 64px; height: 38px; margin: auto; border-radius: 4px; }
+  .strips td.now img { outline: 2px solid var(--gold); outline-offset: 1px; }
+
+  @media (max-width: 860px) {
+    .machine { grid-template-columns: minmax(0, 1fr); }
+  }
+  @media (max-width: 560px) {
+    .ledbox output, .led output { font-size: 22px; }
+    .leds { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .topbar .btn { flex: 1 1 auto; }
+  }
+</style>
+<script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js" } }</script>
+<!-- ARTIFACT-HEAD-END -->
+</head>
+<body>
+<main class="app">
+  <section class="hall" id="hall" aria-labelledby="hall-title">
+    <header class="topbar">
+      <div class="store-name">
+        <h1 id="hall-title" tabindex="-1">漢字会館</h1>
+        <p>台を選んで座ります。メダルと台のデータはこのブラウザに保存されます。</p>
+      </div>
+      <div class="ledbox"><small>営業日</small><output aria-live="off" id="day">開店準備中</output></div>
+      <div class="ledbox"><small>持ちメダル</small><output aria-live="off" id="medals">0</output></div>
+      <div class="ledbox"><small>収支（貸出 <span id="lent">0</span>枚）</small><output aria-live="off" id="net">±0</output></div>
+      <button class="btn gold" id="lend-hall" type="button">メダルを借りる（50枚）</button>
+      <button class="btn quiet" id="close-day" type="button">閉店して翌日へ</button>
+      <p class="message" id="hall-message" aria-live="polite"></p>
+    </header>
+    <div class="hall" id="islands"></div>
+    <section class="island" aria-labelledby="new-title">
+      <div class="section-head"><h2 id="new-title">新台コーナー</h2><p>機種データを1つ足すと、ここに島が増える</p></div>
+      <div class="coming"><strong>入替予定</strong><span>次の機種はここに並びます</span></div>
+    </section>
+    <section class="island" aria-labelledby="past-title">
+      <div class="section-head"><h2 id="past-title">前日までのデータ</h2><p>設定を公開。日付を選ぶと切り替わる</p></div>
+      <div class="tabs" id="tabs" role="group" aria-label="日付"></div>
+      <div class="table-wrap" id="past"></div>
+    </section>
+  </section>
+
+  <section class="machine" id="machine" aria-labelledby="model-name" hidden>
+    <div class="cabinet">
+      <header class="marquee"><h1 class="title" id="model-name" tabindex="-1">KANJI4号機</h1><output aria-live="off" id="no"></output></header>
+      <div class="window">
+        <div class="stage">
+          <canvas id="reels" aria-hidden="true"></canvas>
+          <div class="overlay loading" id="loading">リールを準備しています…</div>
+          <div class="overlay" id="wait" hidden>WAIT</div>
+          <div class="toast" id="toast" role="status" hidden></div>
+        </div>
+        <p class="message" id="message" aria-live="polite" hidden></p>
+        <div class="deck" role="group" aria-label="操作">
+          <button class="lever" id="lever" type="button" aria-label="レバー（Space）"><span class="knob"></span><span class="stick"></span><kbd>Space</kbd></button>
+          <button class="stop" id="stop0" type="button" aria-label="左リール停止（J）"><kbd>J</kbd></button>
+          <button class="stop" id="stop1" type="button" aria-label="中リール停止（K）"><kbd>K</kbd></button>
+          <button class="stop" id="stop2" type="button" aria-label="右リール停止（L）"><kbd>L</kbd></button>
+        </div>
+      </div>
+      <section class="leds" aria-label="カウンター">
+        <div class="led"><small>CREDIT</small><output aria-live="off" id="credit">0</output></div>
+        <div class="led"><small>獲得</small><output aria-live="off" id="payout">0</output></div>
+        <div class="led"><small>前回から</small><output aria-live="off" id="games">0</output></div>
+        <div class="led"><small>残りG</small><output aria-live="off" id="left">-</output></div>
+        <div class="led"><small>BIG</small><output aria-live="off" id="bigs">0</output></div>
+        <div class="led"><small>REG</small><output aria-live="off" id="regs">0</output></div>
+      </section>
+    </div>
+    <div class="panel">
+      <div><button class="btn gold" id="leave" type="button">← 台移動（ホールへ）</button></div>
+      <p class="status"><span class="chip" id="state" data-state="normal">通常</span><span id="bonus-info"></span></p>
+      <p class="note">操作はリールの下のレバーと停止ボタン、またはキーボード（Space・J・K・L）。3枚掛けは自動。ボーナス中のJACゲームは1枚掛け。レバーは4.1秒に1回まで（WAIT）。</p>
+      <section class="box" aria-labelledby="history-title">
+        <h2 id="history-title">この台の履歴</h2>
+        <ol class="history" id="history"></ol>
+      </section>
+      <div class="others">
+        <button class="btn" id="lend" type="button">メダルを借りる</button>
+        <button class="btn" id="sound" type="button" aria-pressed="true">音 ON</button>
+        <button class="btn" id="peek" type="button" aria-pressed="false">内部を見る</button>
+        <button class="btn" id="strips" type="button">リール配列</button>
+        <button class="btn" id="explain" type="button" aria-pressed="false">説明 OFF</button>
+      </div>
+      <p class="debug" id="debug" hidden></p>
+      <p class="note">ボーナスが成立すると、レバーで光る（先告知）か、3つ目を止めた後に「吉兆」が灯る（後告知）か、何も起きない（無告知）のどれかです。光の点滅は1秒に3回以下で、動きを減らす設定ではゆっくり光ります。</p>
+    </div>
+  </section>
+
+  <dialog id="history-dialog" aria-labelledby="dialog-title">
+    <h2 id="dialog-title"></h2>
+    <ol class="history" id="dialog-list"></ol>
+    <form method="dialog"><button class="btn" type="submit">閉じる</button></form>
+  </dialog>
+
+  <dialog id="strip-dialog" aria-labelledby="strip-title">
+    <h2 id="strip-title">リール配列</h2>
+    <table class="strips">
+      <thead><tr><th scope="col">番号</th><th scope="col">左</th><th scope="col">中</th><th scope="col">右</th></tr></thead>
+      <tbody id="strip-rows"></tbody>
+    </table>
+    <p class="note">金の枠は、いま中段にあるコマです。番号の小さいコマほど上にあり、リールは下へ流れます。</p>
+    <form method="dialog"><button class="btn" type="submit">閉じる</button></form>
+  </dialog>
+</main>
+<script type="module" src="main.js"></script>
+<!-- ARTIFACT-END -->
+</body>
+</html>
